@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pattuglia Falchi — Scout</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>🦅</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --forest: #1B4332;
+      --forest-light: #2D6A4F;
+      --forest-dark: #081C15;
+      --earth: #6B4226;
+      --earth-light: #8B5E3C;
+      --earth-dark: #4A2E1A;
+      --sand: #D4A373;
+      --sand-light: #E9D5B7;
+      --cream: #FAF3E0;
+      --gold: #D4A017;
+      --gold-light: #F0D060;
+      --white: #FFFFFF;
+      --text: #1a1a1a;
+      --text-light: #555;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background: var(--cream);
+      overflow-x: hidden;
+    }
+
+    /* ── Navbar ── */
+    nav {
+      position: fixed; top:0; left:0; right:0; z-index:1000;
+      background: rgba(27,67,50,0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 0 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+    }
+    .nav-brand {
+      font-family: 'Cinzel', serif;
+      font-size: 1.4rem;
+      color: var(--gold-light);
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-decoration: none;
+    }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      color: var(--sand-light);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9rem;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      transition: color 0.3s;
+      position: relative;
+    }
+    .nav-links a::after {
+      content:''; position:absolute; bottom:-4px; left:0; width:0;
+      height:2px; background: var(--gold); transition: width 0.3s;
+    }
+    .nav-links a:hover { color: var(--gold-light); }
+    .nav-links a:hover::after { width: 100%; }
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px;
+      background: none; border: none; cursor: pointer; padding: 4px;
+    }
+    .hamburger span {
+      display: block; width: 26px; height: 2px;
+      background: var(--sand-light); border-radius: 2px;
+      transition: all 0.3s;
+    }
+    .hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(5px,5px); }
+    .hamburger.active span:nth-child(2) { opacity: 0; }
+    .hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px,-5px); }
+
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background-image: url('img/hero.jpg');
+      background-size: cover;
+      background-position: center;
+      z-index: 0;
+    }
+    .hero-bg::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(
+        160deg,
+        rgba(8,28,21,0.88) 0%,
+        rgba(27,67,50,0.75) 40%,
+        rgba(107,66,38,0.7) 100%
+      );
+    }
+    .hero-content { position: relative; z-index: 2; max-width: 800px; padding: 6rem 2rem 4rem; }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: rgba(212,160,23,0.15);
+      border: 1px solid rgba(212,160,23,0.4);
+      border-radius: 50px;
+      padding: 0.5rem 1.5rem;
+      margin-bottom: 2rem;
+      color: var(--gold-light);
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      animation: fadeDown 1s ease-out;
+    }
+
+    .hero-emblem {
+      width: 120px; height: 120px;
+      margin: 0 auto 2rem;
+      animation: fadeDown 1.2s ease-out;
+    }
+    .hero-emblem svg { width: 100%; height: 100%; }
+
+    .hero-cry {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(2rem, 5vw, 3.8rem);
+      font-weight: 900;
+      color: var(--white);
+      line-height: 1.2;
+      margin-bottom: 1.5rem;
+      text-shadow: 0 4px 30px rgba(0,0,0,0.5);
+      animation: fadeUp 1s ease-out 0.3s both;
+    }
+    .hero-cry .highlight {
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-slogan {
+      font-size: clamp(1rem, 2.5vw, 1.4rem);
+      color: var(--sand-light);
+      font-weight: 400;
+      letter-spacing: 1px;
+      margin-bottom: 2.5rem;
+      animation: fadeUp 1s ease-out 0.6s both;
+    }
+    .hero-cta {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      background: linear-gradient(135deg, var(--gold), var(--earth-light));
+      color: var(--forest-dark);
+      padding: 1rem 2.5rem;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 1rem;
+      text-decoration: none;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      box-shadow: 0 4px 25px rgba(212,160,23,0.4);
+      transition: all 0.3s;
+      animation: fadeUp 1s ease-out 0.9s both;
+    }
+    .hero-cta:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 35px rgba(212,160,23,0.5);
+    }
+    .scroll-hint {
+      position: absolute; bottom: 2rem; z-index: 2;
+      animation: bounce 2s infinite;
+      color: var(--sand); opacity: 0.6;
+    }
+
+    /* ── Sections ── */
+    section { padding: 5rem 2rem; }
+    .section-header { text-align: center; margin-bottom: 3.5rem; }
+    .section-tag {
+      display: inline-block;
+      font-size: 0.8rem; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--forest-light);
+      margin-bottom: 0.8rem;
+    }
+    .section-title {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 900;
+      color: var(--forest-dark);
+      margin-bottom: 1rem;
+    }
+    .section-line {
+      width: 60px; height: 3px;
+      background: linear-gradient(90deg, var(--gold), var(--earth-light));
+      margin: 0 auto; border-radius: 2px;
+    }
+
+    /* ── Chi Siamo ── */
+    .chi-siamo { background: var(--white); }
+    .chi-grid {
+      max-width: 1100px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4rem;
+      align-items: center;
+    }
+    .chi-image {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      aspect-ratio: 4/3;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+    .chi-image img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .chi-image-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(27,67,50,0.1) 0%, rgba(107,66,38,0.15) 100%);
+      pointer-events: none;
+    }
+    .chi-text h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.6rem;
+      color: var(--forest-dark);
+      margin-bottom: 1.2rem;
+    }
+    .chi-text p {
+      color: var(--text-light);
+      line-height: 1.8;
+      margin-bottom: 1rem;
+      font-size: 1.05rem;
+    }
+    .chi-values {
+      display: flex; flex-wrap: wrap; gap: 0.8rem;
+      margin-top: 1.5rem;
+    }
+    .chi-value {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: var(--cream);
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 0.85rem; font-weight: 600;
+      color: var(--forest);
+      border: 1px solid rgba(27,67,50,0.15);
+    }
+
+    /* ── Membri ── */
+    .membri { background: var(--cream); }
+    .membri-grid {
+      max-width: 1000px; margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+    }
+    .member-card {
+      background: var(--white);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      transition: all 0.4s;
+      text-align: center;
+    }
+    .member-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 40px rgba(27,67,50,0.15);
+    }
+    .member-photo {
+      width: 100%; aspect-ratio: 1;
+      background: linear-gradient(135deg, var(--forest-light), var(--earth));
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+    }
+    .member-photo svg { width: 40%; opacity: 0.35; }
+    .member-photo::after {
+      content:''; position:absolute; bottom:0; left:0; right:0;
+      height: 30%;
+      background: linear-gradient(transparent, rgba(0,0,0,0.15));
+    }
+    .member-info { padding: 1rem 0.8rem 1.3rem; }
+    .member-name {
+      font-family: 'Cinzel', serif;
+      font-weight: 700; font-size: 1rem;
+      color: var(--forest-dark);
+      margin-bottom: 0.25rem;
+    }
+    .member-role {
+      font-size: 0.75arem; font-weight: 600;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--forest-light);
+      margin-bottom: 0.8rem;
+    }
+    .section-title {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 900;
+      color: var(--forest-dark);
+      margin-bottom: 1rem;
+    }
+    .section-line {
+      width: 60px; height: 3px;
+      background: linear-gradient(90deg, var(--gold), var(--earth-light));
+      margin: 0 auto; border-radius: 2px;
+    }
+
+    /* ── Chi Siamo ── */
+    .chi-siamo { background: var(--white); }
+    .chi-grid {
+      max-width: 1100px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4rem;
+      align-items: center;
+    }
+    .chi-image {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      aspect-ratio: 4/3;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+    }
+    .chi-image img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .chi-image-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(27,67,50,0.1) 0%, rgba(107,66,38,0.15) 100%);
+      pointer-events: none;
+    }
+    .chi-text h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.6rem;
+      color: var(--forest-dark);
+      margin-bottom: 1.2rem;
+    }
+    .chi-text p {
+      color: var(--text-light);
+      line-height: 1.8;
+      margin-bottom: 1rem;
+      font-size: 1.05rem;
+    }
+    .chi-values {
+      display: flex; flex-wrap: wrap; gap: 0.8rem;
+      margin-top: 1.5rem;
+    }
+    .chi-value {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: var(--cream);
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 0.85rem; font-weight: 600;
+      color: var(--forest);
+      border: 1px solid rgba(27,67,50,0.15);
+    }
+
+    /* ── Membri ── */
+    .membri { background: var(--cream); }
+    .membri-grid {
+      max-width: 1000px; margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+    }
+    .member-card {
+      background: var(--white);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      transition: all 0.4s;
+      text-align: center;
+    }
+    .member-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 40px rgba(27,67,50,0.15);
+    }
+    .member-photo {
+      width: 100%; aspect-ratio: 1;
+      background: linear-gradient(135deg, var(--forest-light), var(--earth));
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+    }
+    .member-photo svg { width: 40%; opacity: 0.35; }
+    .member-photo::after {
+      content:''; position:absolute; bottom:0; left:0; right:0;
+      height: 30%;
+      background: linear-gradient(transparent, rgba(0,0,0,0.15));
+    }
+    .member-info { padding: 1rem 0.8rem 1.3rem; }
+    .member-name {
+      font-family: 'Cinzel', serif;
+      font-weight: 700; font-size: 1rem;
+      color: var(--forest-dark);
+      margin-bottom: 0.25rem;
+    }
+    .member-role {
+      font-size: 0.75rem; font-weight: 600;
+      letter-spacing: 1px; text-transform: uppercase;
+      color: var(--earth);
+    }
+
+    /* ── Imprese / Gallery ── */
+    .imprese {
+      background: linear-gradient(160deg, var(--forest-dark) 0%, var(--forest) 100%);
+      color: var(--white);
+      padding-bottom: 6rem;
+    }
+    .imprese .section-tag { color: var(--gold-light); }
+    .imprese .section-title { color: var(--white); }
+    .gallery-grid {
+      max-width: 1200px; margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-auto-rows: 260px;
+      gap: 1rem;
+    }
+    .gallery-item {
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+    }
+    .gallery-item img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.6s cubic-bezier(0.22,1,0.36,1);
+    }
+    .gallery-item:hover img { transform: scale(1.08); }
+    .gallery-item.tall { grid-row: span 2; }
+    .gallery-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(transparent 30%, rgba(8,28,21,0.85));
+      display: flex; flex-direction: column;
+      justify-content: flex-end;
+      padding: 1.5rem;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    .gallery-item:hover .gallery-overlay { opacity: 1; }
+    .gallery-overlay h4 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.05rem;
+      color: var(--white);
+      margin-bottom: 0.3rem;
+    }
+    .gallery-overlay p {
+      font-size: 0.8rem;
+      color: var(--sand-light);
+    }
+
+    /* ── Lightbox ── */
+    .member-name {
+      font-family: 'Cinzel', serif;
+      font-weight: 700; font-size: 1rem;
+      color: var(--forest-dark);
+      margin-bottom: 0.25rem;
+    }
+    .member-role {
+      font-size: 0.75rem; font-weight: 600;
+      letter-spacing: 1px; text-transform: uppercase;
+      color: var(--earth);
+    }
+
+    /* ── Imprese / Gallery ── */
+    .imprese {
+      background: linear-gradient(160deg, var(--forest-dark) 0%, var(--forest) 100%);
+      color: var(--white);
+      padding-bottom: 6rem;
+    }
+    .imprese .section-tag { color: var(--gold-light); }
+    .imprese .section-title { color: var(--white); }
+    .gallery-grid {
+      max-width: 1200px; margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-auto-rows: 260px;
+      gap: 1rem;
+    }
+    .gallery-item {
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+    }
+    .gallery-item img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.6s cubic-bezier(0.22,1,0.36,1);
+    }
+    .gallery-item:hover img { transform: scale(1.08); }
+    .gallery-item.tall { grid-row: span 2; }
+    .gallery-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(transparent 30%, rgba(8,28,21,0.85));
+      display: flex; flex-direction: column;
+      justify-content: flex-end;
+      padding: 1.5rem;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    .gallery-item:hover .gallery-overlay { opacity: 1; }
+    .gallery-overlay h4 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.05rem;
+      color: var(--white);
+      margin-bottom: 0.3rem;
+    }
+    .gallery-overlay p {
+      font-size: 0.8rem;
+      color: var(--sand-light);
+    }
+
+    /* ── Lightbox ── */
+    .lightbox {
+      display: none; position: fixed; inset: 0;
+      z-index: 9999;
+      background: rgba(0,0,0,0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      align-items: center; justify-content: center;
+      padding: 2rem;
+      cursor: zoom-out;
+    }
+    .lightbox.active { display: flex; }
+    .lightbox img {
+      max-width: 90%; max-height: 90vh;
+      border-radius: 8px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      object-fit: contain;
+    }
+    .lightbox-close {
+      position: absolute; top: 1.5rem; right: 1.5rem;
+      background: rgba(255,255,255,0.15); border: none;
+      color: white; font-size: 1.5rem;
+      width: 48px; height: 48px;
+      border-radius: 50%; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.3s;
+    }
+    .lightbox-close:hover { background: rgba(255,255,255,0.3); }
+    .lightbox-caption {
+      position: absolute; bottom: 2rem; left: 50%;
+      transform: translateX(-50%);
+      color: var(--sand-light);
+      font-family: 'Cinzel', serif;
+      font-size: 1.1rem;
+      text-align: center;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    }
+
+    /* ── Footer ── */
+    footer {
+      background: var(--forest-dark);
+      color: var(--sand-light);
+      text-align: center;
+      padding: 3rem 2rem;
+    }
+    .footer-brand {
+      font-family: 'Cinzel', serif;
+      font-size: 1.5rem; font-weight: 900;
+      color: var(--gold-light);
+      margin-bottom: 0.5rem;
+    }
+    .footer-slogan {
+      font-size: 0.9rem; color: var(--sand);
+      margin-bottom: 1.5rem; font-style: italic;
+    }
+    .footer-line {
+      width: 40px; height: 2px;
+      background: var(--gold);
+      margin: 0 auto 1.5rem; border-radius: 2px;
+    }
+    footer p {
+      font-size: 0.8rem;
+      color: rgba(212,163,115,0.5);
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from { opacity:0; transform: translateY(30px); }
+      to { opacity:1; transform: translateY(0); }
+    }
+    @keyframes fadeDown {
+      from { opacity:0; transform: translateY(-20px); }
+      to { opacity:1; transform: translateY(0); }
+    }
+    @keyframes bounce {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(8px); }
+    }
+    .reveal {
+      opacity: 0; transform: translateY(40px);
+      transition: all 0.8s cubic-bezier(0.22,1,0.36,1);
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+        position: absolute; top: 64px; left: 0; right: 0;
+        background: rgba(27,67,50,0.98);
+        flex-direction: column;
+        padding: 1.5rem 2rem;
+        gap: 1.2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      }
+      .nav-links.active { display: flex; }
+      .hamburger { display: flex; }
+      .chi-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+        grid-auto-rows: 200px;
+      }
+      .gallery-item.tall { grid-row: span 1; }
+      .membri-grid { grid-template-columns: repeat(2, 1fr); }
+      section { padding: 3.5rem 1.5rem; }
+    }
+    @media (max-width: 480px) {
+      .gallery-grid {
+        grid-template-columns: 1fr;
+        grid-auto-rows: 220px;
+      }
+      .membri-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+      nav { padding: 0 1rem; }
+      .hero-emblem { width: 90px; height: 90px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══ NAVBAR ══ -->
+  <nav>
+    <a href="#" class="nav-brand">🦅 FALCHI</a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#chi-siamo">Chi siamo</a></li>
+      <li><a href="#membri">Membri</a></li>
+      <li><a href="#imprese">Imprese</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- ══ HERO ══ -->
+  <section class="hero" id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <div class="hero-badge">⚜️ Pattuglia Scout</div>
+      <div class="hero-emblem">
+        <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="100" cy="100" r="90" stroke="rgba(240,208,96,0.3)" stroke-width="2" fill="none"/>
+          <circle cx="100" cy="100" r="80" stroke="rgba(240,208,96,0.15)" stroke-width="1" fill="none"/>
+          <path d="M100 35 L65 95 L40 130 L70 115 L85 145 L100 110 L115 145 L130 115 L160 130 L135 95 Z"
+                fill="rgba(240,208,96,0.8)" stroke="rgba(240,208,96,1)" stroke-width="1.5"/>
+          <path d="M90 80 L100 65 L110 80 L105 78 L100 85 L95 78 Z" fill="rgba(255,255,255,0.6)"/>
+        </svg>
+      </div>
+      <h1 class="hero-cry">
+        <span class="highlight">Falchi nel cielo,</span><br>forti davvero
+      </h1>
+      <p class="hero-slogan">Del nostro meglio</p>
+      <a href="#chi-siamo" class="hero-cta">
+        Scopri la pattuglia
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+    <div class="scroll-hint">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    </div>
+  </section>
+
+  <!-- ══ CHI SIAMO ══ -->
+  <section class="chi-siamo" id="chi-siamo">
+    <div class="section-header reveal">
+      <span class="section-tag">La nostra storia</span>
+      <h2 class="section-title">Chi Siamo</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="chi-grid">
+      <div class="chi-image reveal">
+        <img src="img/chi-siamo.jpg" alt="La Pattuglia Falchi" loading="lazy">
+        <div class="chi-image-overlay"></div>
+      </div>
+      <div class="chi-text reveal">
+        <h3>Una pattuglia, una famiglia</h3>
+        <p>
+          I <strong>Falchi</strong> sono una pattuglia maschile unita da un legame profondo: la passione per l'avventura, il rispetto per la natura e la voglia di dare sempre il meglio in ogni sfida.
+        </p>
+        <p>
+          Nati sotto il segno del falco — simbolo di coraggio, velocità e visione — ci alleniamo insieme, cresciamo insieme e affrontiamo ogni impresa con lo spirito di squadra che ci contraddistingue. Dal montaggio del campo alla costruzione pionieristica, dalla cucina trappeur alle esplorazioni notturne: per noi ogni attività è un'occasione per migliorarci.
+        </p>
+        <p>
+          Il nostro motto è semplice: <em>"Chi vola in alto, vede lontano."</em> E noi voliamo sempre insieme.
+        </p>
+        <div class="chi-values">
+          <span class="chi-value">🔥 Coraggio</span>
+          <span class="chi-value">🤝 Lealtà</span>
+          <span class="chi-value">🏕️ Avventura</span>
+          <span class="chi-value">💪 Impegno</span>
+          <span class="chi-value">🌲 Natura</span>
+          <span class="chi-value">⚜️ Servizio</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ MEMBRI ══ -->
+  <section class="membri" id="membri">
+    <div class="section-header reveal">
+      <span class="section-tag">La squadra</span>
+      <h2 class="section-title">I Nostri Membri</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="membri-grid">
+      <div class="member-card reveal">
+        <div class="member-photo" style="background: linear-gradient(135deg, #2D6A4F, #4A2E1A);">
+          <svg viewBox="0 0 24 24" fill="white"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+        </div>
+        <div class="member-info">
+          <div class="member-name">Capo Pattuglia</div>
+          <div class="member-role">Guida</div>
+        </div>
+      </div>
+      <div class="member-card reveal">
+        <div class="member-photo" style="background: linear-gradient(135deg, #1B4332, #6B4226);">
+          <svg viewBox="0 0 24 24" fill="white"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+        </div>
+        <div class="member-info">
+          <div class="member-name">Vice Capo</div>
+          <div class="member-role">Secondo</div>
+        </div>
+      </div>
+      <div class="member-card reveal">
+        <div class="member-photo" style="background: linear-gradient(135deg, #2D6A4F, #8B5E3C);">
+          <svg viewBox="0 0 24 24" fill="white"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+        </div>
+        <div class="member-info">
+          <div class="member-name">Membro 1</div>
+          <div class="member-role">Esploratore</div>
+        </div>
+      </div>
+      <div class="member-card reveal">
+        <div class="member-photo" style="background: linear-gradient(135deg, #4A2E1A, #2D6A4F);">
+          <svg viewBox="0 0 24 24" fill="white"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+        </div>
+        <div class="member-info">
+          <div class="member-name">Membro 2</div>
+          <div class="member-role">Esploratore</div>
+        </div>
+      </div>
+      <div class="member-card reveal">
+        <div class="member-photo" style="background: linear-gradient(135deg, #1B4332, #8B5E3C);">
+          <svg viewBox="0 0 24 24" fill="white"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+        </div>
+        <div class="member-info">
+          <div class="member-name">Membro 3</div>
+          <div class="member-role">Esploratore</div>
+        </div>
+      </div>
+      <div class="member-card reveal">
+        <div class="member-photo" style="background: linear-gradient(135deg, #6B4226, #2D6A4F);">
+          <svg viewBox="0 0 24 24" fill="white"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+        </div>
+        <div class="member-info">
+          <div class="member-name">Membro 4</div>
+          <div class="member-role">Esploratore</div>
+        </div>
+      </div>
+      <div class="member-card reveal">
+        <div class="member-photo" style="background: linear-gradient(135deg, #2D6A4F, #4A2E1A);">
+          <svg viewBox="0 0 24 24" fill="white"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+        </div>
+        <div class="member-info">
+          <div class="member-name">Membro 5</div>
+          <div class="member-role">Esploratore</div>
+        </div>
+      </div>
+      <div class="member-card reveal">
+        <div class="member-photo" style="background: linear-gradient(135deg, #1B4332, #6B4226);">
+          <svg viewBox="0 0 24 24" fill="white"><path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/></svg>
+        </div>
+        <div class="member-info">
+          <div class="member-name">Membro 6</div>
+          <div class="member-role">Esploratore</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ IMPRESE ══ -->
+  <section class="imprese" id="imprese">
+    <div class="section-header reveal">
+      <span class="section-tag">Le avventure</span>
+      <h2 class="section-title">Le Nostre Imprese</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="gallery-grid">
+      <div class="gallery-item tall reveal" data-caption="Avventura nel bosco">
+        <img src="img/gallery-bosco.jpg" alt="Gruppo nel bosco" loading="lazy">
+        <div class="gallery-overlay">
+          <h4>Avventura nel Bosco</h4>
+          <p>Esplorazione e spirito di squadra tra gli alberi</p>
+        </div>
+      </div>
+      <div class="gallery-item reveal" data-caption="Accensione del fuoco">
+        <img src="img/gallery-fuoco.jpg" alt="Accensione fuoco" loading="lazy">
+        <div class="gallery-overlay">
+          <h4>Accensione del Fuoco</h4>
+          <p>La scintilla che unisce la pattuglia</p>
+        </div>
+      </div>
+      <div class="gallery-item reveal" data-caption="Selfie in viaggio">
+        <img src="img/gallery-selfie.jpg" alt="Selfie in macchina" loading="lazy">
+        <div class="gallery-overlay">
+          <h4>In Viaggio</h4>
+          <p>Verso nuove avventure, sempre insieme</p>
+        </div>
+      </div>
+      <div class="gallery-item reveal" data-caption="Gruppo con bandiera">
+        <img src="img/gallery-bandiera.jpg" alt="Gruppo con bandiera e cesto" loading="lazy">
+        <div class="gallery-overlay">
+          <h4>Spirito di Squadra</h4>
+          <p>Uniti sotto la nostra bandiera</p>
+        </div>
+      </div>
+      <div class="gallery-item reveal" data-caption="Fuoco di bivacco">
+        <img src="img/gallery-fuoco2.jpg" alt="Accensione fuoco 2" loading="lazy">
+        <div class="gallery-overlay">
+          <h4>Fuoco di Bivacco</h4>
+          <p>Serate indimenticabili sotto le stelle</p>
+        </div>
+      </div>
+      <div class="gallery-item tall reveal" data-caption="Tecnica del fuoco">
+        <img src="img/gallery-fuoco3.jpg" alt="Accensione fuoco 3" loading="lazy">
+        <div class="gallery-overlay">
+          <h4>Maestri del Fuoco</h4>
+          <p>Padroneggiare le tecniche scout</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ FOOTER ══ -->
+  <footer>
+    <div class="footer-brand">🦅 FALCHI</div>
+    <p class="footer-slogan">"Del nostro meglio"</p>
+    <div class="footer-line"></div>
+    <p>&copy; 2025 Pattuglia Falchi — Sempre Pronti</p>
+  </footer>
+
+  <!-- ══ LIGHTBOX ══ -->
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lightboxClose">✕</button>
+    <img src="" alt="" id="lightboxImg">
+    <div class="lightbox-caption" id="lightboxCaption"></div>
+  </div>
+
+  <script>
+    // Mobile menu
+    const hamburger = document.getElementById('hamburger');
+    const navLinks = document.getElementById('navLinks');
+    hamburger.addEventListener('click', () => {
+      navLinks.classList.toggle('active');
+      hamburger.classList.toggle('active');
+    });
+    navLinks.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        navLinks.classList.remove('active');
+        hamburger.classList.remove('active');
+      });
+    });
+
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Lightbox
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
+    const lightboxCaption = document.getElementById('lightboxCaption');
+    document.querySelectorAll('.gallery-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const img = item.querySelector('img');
+        if (img) {
+          lightboxImg.src = img.src;
+          lightboxCaption.textContent = item.dataset.caption || '';
+          lightbox.classList.add('active');
+          document.body.style.overflow = 'hidden';
+        }
+      });
+    });
+    function closeLightbox() {
+      lightbox.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+
+    // Navbar background on scroll
+    window.addEventListener('scroll', () => {
+      const nav = document.querySelector('nav');
+      nav.style.background = window.scrollY > 100
+        ? 'rgba(8,28,21,0.98)'
+        : 'rgba(27,67,50,0.95)';
+    });
+  </script>
+
+</body>
+</html>
